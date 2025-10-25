@@ -1,7 +1,8 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
 // Initialize the Google Gemini AI client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// FIX: Per coding guidelines, the API key must be obtained from `process.env.API_KEY`.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const imagePromptingSystemInstruction = `You are an expert at analyzing images and creating descriptive prompts for AI image generation. Describe the provided image in vivid detail. Cover the main subject, the background/setting, the artistic style (e.g., photorealistic, illustration, painting), the lighting, the color palette, composition, and overall mood. The description must be a single, coherent paragraph suitable for use as a prompt for a text-to-image AI model. Do not add any preamble or explanation.`;
 
