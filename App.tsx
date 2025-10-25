@@ -6,6 +6,7 @@ import { Footer } from './components/Footer';
 import { HistorySidebar } from './components/HistorySidebar';
 import { generatePromptFromImage, generateImageFromPrompt } from './services/geminiService';
 import { ErrorBanner } from './components/ErrorBanner';
+import { ApiKeyBanner } from './components/ApiKeyBanner';
 import { HistoryItem, getHistory, saveHistory } from './utils/history';
 import { CopyIcon } from './components/icons/CopyIcon';
 import { CheckIcon } from './components/icons/CheckIcon';
@@ -14,6 +15,7 @@ import { GeneratedImageModal } from './components/GeneratedImageModal';
 
 type Stage = 'UPLOADING' | 'PROMPTING';
 
+const API_KEY_STORAGE_KEY = 'gemini-api-key';
 const ART_STYLES = ['Photorealistic', 'Illustration', 'Anime', 'Oil Painting', 'Pixel Art', 'None'];
 
 const getStyleSuffix = (style: string): string => {
@@ -24,6 +26,7 @@ const getStyleSuffix = (style: string): string => {
 };
 
 const App: React.FC = () => {
+  const [apiKey, setApiKey] = useState<string>('');
   const [uploadedImage, setUploadedImage] = useState<{ data: string; mimeType: string; } | null>(null);
   const [stage, setStage] = useState<Stage>('UPLOADING');
   const [editablePrompt, setEditablePrompt] = useState('');
@@ -40,8 +43,24 @@ const App: React.FC = () => {
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
+    const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    if (savedKey) {
+      setApiKey(savedKey);
+    }
     setHistory(getHistory());
   }, []);
+
+  const handleApiKeySave = (key: string) => {
+    setApiKey(key);
+    localStorage.setItem(API_KEY_STORAGE_KEY, key);
+  };
+  
+  const handleClearApiKey = () => {
+    if (window.confirm('Are you sure you want to clear your API Key? You will need to re-enter it to use the app.')) {
+      setApiKey('');
+      localStorage.removeItem(API_KEY_STORAGE_KEY);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,12 +85,12 @@ const App: React.FC = () => {
   };
   
   const handleCreatePrompt = useCallback(async () => {
-    if (!uploadedImage) return;
+    if (!uploadedImage || !apiKey) return;
 
     setIsLoadingPrompt(true);
     setError(null);
     try {
-      const prompt = await generatePromptFromImage(uploadedImage);
+      const prompt = await generatePromptFromImage(uploadedImage, apiKey);
       const defaultStyle = ART_STYLES[0];
       
       setEditablePrompt(prompt + getStyleSuffix(defaultStyle));
@@ -94,7 +113,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoadingPrompt(false);
     }
-  }, [uploadedImage, history]);
+  }, [uploadedImage, history, apiKey]);
 
   const handleStyleChange = (newStyle: string) => {
     const oldSuffix = getStyleSuffix(selectedStyle);
@@ -142,12 +161,12 @@ const App: React.FC = () => {
   }, [editablePrompt]);
   
   const handleGenerateImage = async () => {
-    if (!editablePrompt.trim()) return;
+    if (!editablePrompt.trim() || !apiKey) return;
 
     setIsGeneratingImage(true);
     setError(null);
     try {
-      const image = await generateImageFromPrompt(editablePrompt);
+      const image = await generateImageFromPrompt(editablePrompt, apiKey);
       setGeneratedImage(image);
       setIsImageModalOpen(true);
     } catch (err: any) {
@@ -158,10 +177,15 @@ const App: React.FC = () => {
   };
 
   const handleClearError = () => setError(null);
+  const isAppDisabled = !apiKey;
 
   return (
     <div className="bg-slate-900 text-white min-h-screen font-sans flex flex-col">
-      <Header onHistoryClick={() => setIsHistoryOpen(true)} />
+      <Header 
+        onHistoryClick={() => setIsHistoryOpen(true)}
+        hasApiKey={!!apiKey}
+        onClearApiKey={handleClearApiKey}
+      />
       
       <HistorySidebar 
         isOpen={isHistoryOpen} 
@@ -173,11 +197,13 @@ const App: React.FC = () => {
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         <div className="max-w-3xl mx-auto">
-            <>
-              {error && (
-                <ErrorBanner message={error} onDismiss={handleClearError} />
-              )}
+            {error && (
+              <ErrorBanner message={error} onDismiss={handleClearError} />
+            )}
               
+            {isAppDisabled && <ApiKeyBanner onSave={handleApiKeySave} />}
+            
+            <div className={isAppDisabled ? 'opacity-50 pointer-events-none' : ''}>
               {stage === 'UPLOADING' && (
                 <PromptInput
                   image={uploadedImage}
@@ -283,7 +309,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
               )}
-            </>
+            </div>
         </div>
       </main>
       
