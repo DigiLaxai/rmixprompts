@@ -1,1 +1,14 @@
-{"name":"rmixprompts","version":"1.0.0","private":true,"scripts":{"dev":"vite","build":"vite build","preview":"vite preview"},"dependencies":{"react":"^18.2.0","react-dom":"^18.2.0","@google/genai":"^1.28.0"},"devDependencies":{"vite":"^5.0.0","@vitejs/plugin-react":"^4.0.0","typescript":"^5.5.2","@types/react":"^18.2.21","@types/react-dom":"^18.2.7"}}
+{
+  "name": "nano-banana-prompt-crafter",
+  "version": "1.0.0",
+  "description": "An AI-powered application to generate creative and detailed prompts for image generation models.",
+  "private": true,
+  "scripts": {},
+  "dependencies": {
+    "@google/genai": "^1.28.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "typescript": "^5.5.2"
+  }
+}
