@@ -11,7 +11,6 @@ import { CopyIcon } from './components/icons/CopyIcon';
 import { CheckIcon } from './components/icons/CheckIcon';
 import { WandIcon } from './components/icons/WandIcon';
 import { GeneratedImageModal } from './components/GeneratedImageModal';
-import { KeyIcon } from './components/icons/KeyIcon';
 
 type Stage = 'UPLOADING' | 'PROMPTING';
 
@@ -25,9 +24,6 @@ const getStyleSuffix = (style: string): string => {
 };
 
 const App: React.FC = () => {
-  const [apiKey, setApiKey] = useState<string | null>(() => sessionStorage.getItem('gemini-api-key'));
-  const [apiKeyInput, setApiKeyInput] = useState('');
-
   const [uploadedImage, setUploadedImage] = useState<{ data: string; mimeType: string; } | null>(null);
   const [stage, setStage] = useState<Stage>('UPLOADING');
   const [editablePrompt, setEditablePrompt] = useState('');
@@ -46,21 +42,6 @@ const App: React.FC = () => {
   useEffect(() => {
     setHistory(getHistory());
   }, []);
-
-  const handleApiKeySave = () => {
-    if (apiKeyInput.trim()) {
-      sessionStorage.setItem('gemini-api-key', apiKeyInput.trim());
-      setApiKey(apiKeyInput.trim());
-      setApiKeyInput('');
-    }
-  };
-
-  const handleApiKeyReset = () => {
-    if (window.confirm('Are you sure you want to reset your API key?')) {
-      sessionStorage.removeItem('gemini-api-key');
-      setApiKey(null);
-    }
-  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,7 +161,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-slate-900 text-white min-h-screen font-sans flex flex-col">
-      <Header onHistoryClick={() => setIsHistoryOpen(true)} onResetApiKey={handleApiKeyReset} />
+      <Header onHistoryClick={() => setIsHistoryOpen(true)} />
       
       <HistorySidebar 
         isOpen={isHistoryOpen} 
@@ -192,38 +173,6 @@ const App: React.FC = () => {
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         <div className="max-w-3xl mx-auto">
-          {!apiKey ? (
-            <div className="bg-slate-800/50 p-6 rounded-xl shadow-lg border border-yellow-500/50 text-center">
-              <KeyIcon className="mx-auto h-12 w-12 text-yellow-500" />
-              <h2 className="text-xl font-semibold mt-4 mb-2 text-slate-200">Set Your API Key</h2>
-              <p className="text-slate-400 mb-4 max-w-md mx-auto">To use this app, please enter your Google AI API key. It will be stored securely in your browser for this session only.</p>
-              <div className="flex flex-col sm:flex-row gap-2 max-w-sm mx-auto">
-                  <input
-                      type="password"
-                      value={apiKeyInput}
-                      onChange={(e) => setApiKeyInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleApiKeySave()}
-                      placeholder="Enter your Google AI API Key"
-                      className="flex-grow bg-slate-900 border border-slate-600 rounded-lg p-3 text-slate-100 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-shadow"
-                  />
-                  <button
-                      onClick={handleApiKeySave}
-                      className="bg-yellow-500 text-slate-900 font-bold py-3 px-6 rounded-lg hover:bg-yellow-400 transition-colors"
-                  >
-                      Save Key
-                  </button>
-              </div>
-              <p className="text-xs text-slate-500 mt-3 flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
-                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-400">
-                      Get a key from Google AI Studio
-                  </a>
-                  <span className="hidden sm:inline">or</span>
-                  <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-400">
-                      Use a key from Google Cloud
-                  </a>
-              </p>
-            </div>
-          ) : (
             <>
               {error && (
                 <ErrorBanner message={error} onDismiss={handleClearError} />
@@ -335,7 +284,6 @@ const App: React.FC = () => {
                 </div>
               )}
             </>
-          )}
         </div>
       </main>
       
