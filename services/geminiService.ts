@@ -1,58 +1,32 @@
-import { GoogleGenAI, Modality } from "@google/genai";
-
-// Initialize the Google Gemini AI client
-// FIX: Per coding guidelines, the API key must be obtained from `process.env.API_KEY`.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-const imagePromptingSystemInstruction = `You are an expert at analyzing images and creating descriptive prompts for AI image generation. Describe the provided image in vivid detail. Cover the main subject, the background/setting, the artistic style (e.g., photorealistic, illustration, painting), the lighting, the color palette, composition, and overall mood. The description must be a single, coherent paragraph suitable for use as a prompt for a text-to-image AI model. Do not add any preamble or explanation.`;
-
 interface Image {
     data: string;
     mimeType: string;
 }
 
-export const generatePromptFromImage = async (image: Image): Promise<string> => {
-    const contents = {
-        parts: [{
-            inlineData: {
-                data: image.data,
-                mimeType: image.mimeType,
-            },
+const callApi = async (endpoint: string, body: object) => {
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
         },
-        { text: "Describe this image for a text-to-image AI model." }
-    ]};
-
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents,
-        config: {
-            systemInstruction: imagePromptingSystemInstruction,
-            temperature: 0.4,
-        },
+        body: JSON.stringify(body),
     });
 
-    return response.text.trim();
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.error || `Request failed with status ${response.status}`);
+    }
+
+    return result;
+}
+
+export const generatePromptFromImage = async (image: Image): Promise<string> => {
+    const result = await callApi('/api/generatePrompt', { image });
+    return result.prompt;
 }
 
 export const generateImageFromPrompt = async (prompt: string): Promise<Image> => {
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: {
-            parts: [{ text: prompt }],
-        },
-        config: {
-            responseModalities: [Modality.IMAGE],
-        },
-    });
-
-    for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-            return {
-                data: part.inlineData.data,
-                mimeType: part.inlineData.mimeType,
-            };
-        }
-    }
-    
-    throw new Error('Image generation failed. No image data received.');
+    const result = await callApi('/api/generateImage', { prompt });
+    return result.image;
 };

@@ -1,22 +1,14 @@
 {
-  "name": "copy-of-nano-banana-prompt-crafter",
+  "name": "nano-banana-prompt-crafter",
+  "version": "1.0.0",
+  "description": "An AI-powered application to generate creative and detailed prompts for image generation models.",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
   "dependencies": {
-    "react": "^19.2.0",
-    "@google/genai": "^1.24.0",
-    "react-dom": "^19.2.0"
+    "@google/genai": "^1.24.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/node": "^20.11.24",
+    "@vercel/node": "^3.0.21",
+    "typescript": "^5.0.0"
   }
 }
