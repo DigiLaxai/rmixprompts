@@ -4,7 +4,7 @@
   "description": "An AI-powered application to generate creative and detailed prompts for image generation models.",
   "private": true,
   "scripts": {
-    "build": "echo \"Client-side requires no build. Vercel will build API routes automatically.\""
+    "build": "rm -f index.html index.tsx App.tsx metadata.json && rm -rf components services utils && echo 'Cleaned up root directory'"
   },
   "dependencies": {
     "@google/genai": "^1.28.0"
