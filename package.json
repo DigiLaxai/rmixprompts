@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "An AI-powered application to generate creative and detailed prompts for image generation models.",
   "private": true,
+  "scripts": {
+    "build": "echo \"Static site with in-browser transpilation. No build needed.\""
+  },
   "dependencies": {
     "@google/genai": "^1.28.0"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
+    "@types/node": "^20.14.10",
     "@vercel/node": "^3.2.0",
     "typescript": "^5.5.3"
   }
